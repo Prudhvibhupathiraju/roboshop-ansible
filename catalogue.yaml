@@ -24,14 +24,14 @@
       url: https://roboshop-builds.s3.amazonaws.com/catalogue.zip
       dest: /tmp
 
-  - name: Extract foo.tgz into /var/lib/foo
+  - name: Extracting code
     ansible.builtin.unarchive:
       src: /tmp/catalogue.zip
       dest: /app
       remote_src: yes
 
   - name: Installing Dependencies
-    ansible.builtin.command:
+    ansible.builtin.command: npm install 
     args:
       chdir: /app
 
