@@ -12,8 +12,8 @@
 
   - name: Installing redis
     ansible.builtin.package:
-    name: redis
-    state: present
+     name: redis
+     state: present
 
   - name: Giving remote access
     ansible.builtin.replace:
