@@ -1,0 +1,74 @@
+- name: user
+  hosts: user
+  become: yes
+  tasks: 
+  - name: disable old nodejs and enable nodejs:18
+    ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
+
+  - name: Installing nodejs
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+
+  - name: Adding application User  
+    ansible.builtin.user:
+     name: roboshop
+
+  - name: Recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent   
+
+  - name: Create a directory if it does not exist
+    ansible.builtin.file:
+      path: /app
+      state: directory 
+
+  - name: Downloading application cose
+    ansible.builtin.get_url:
+      url: https://roboshop-builds.s3.amazonaws.com/user.zip
+      dest: /tmp
+
+  - name: Extracting code
+    ansible.builtin.unarchive:
+      src: /tmp/user.zip
+      dest: /app
+      remote_src: yes
+
+  - name: Installing Dependencies
+    ansible.builtin.command: npm install 
+    args:
+      chdir: /app
+
+  - name: Copying user.service in systemd
+    ansible.builtin.copy:
+      src: user.service
+      dest: /etc/systemd/system/user.service
+
+  - name: Loading the service.
+    ansible.builtin.systemd_service:    
+      daemon_reload: true
+
+  - name: Copying MongoDB repo file
+    ansible.builtin.copy:
+      src: mongodb.repo
+      dest: /etc/yum.repos.d/mongodb.repo
+
+  - name: Installing mongodb client
+    ansible.builtin.package:
+      name: mongodb-org-shell
+      state: present
+
+  - name: get the categories count
+    ansible.builtin.command: mongo --host mongodb.bhpr.online --quiet --eval 'db = db.getSiblingDB("users"); db.users.count()'
+    register: product_count 
+
+  - name: load the user data
+    ansible.builtin.command: mongo --host mongodb.bhpr.online < /app/schema/user.js      
+    when: user_count.stdout == "0"
+
+  - name: starting and enabling the service
+    ansible.builtin.service:
+      name: user  
+      state: restarted
+      enabled: yes       
