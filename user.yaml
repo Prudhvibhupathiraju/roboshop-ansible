@@ -65,7 +65,7 @@
 
   - name: load the user data
     ansible.builtin.command: mongo --host mongodb.bhpr.online < /app/schema/user.js      
-    when: user_count.stdout == "0"
+    when: user_count == "0"
 
   - name: starting and enabling the service
     ansible.builtin.service:
