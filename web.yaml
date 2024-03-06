@@ -4,7 +4,7 @@
   tasks:
   - name: Installing Nginx
     ansible.builtin.package:
-      name: Nginx
+      name: nginx
       state: present
 
   - name: Removing the default content that web server is serving.  
