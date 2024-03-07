@@ -3,8 +3,8 @@
   tasks:
   - name: Installing maven
     ansible.builtin.package:
-    name: maven
-    state: present
+      name: maven
+      state: present
 
   - name: Adding application User  
     ansible.builtin.user:
